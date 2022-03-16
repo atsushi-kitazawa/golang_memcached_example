@@ -1,7 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/bradfitz/gomemcache/memcache"
+)
 
 func main() {
-	fmt.Println("hello")
+	doMain()
+}
+
+func doMain() {
+	mc := memcache.New("localhost:11211")
+	mc.Set((&memcache.Item{Key: "foo", Value: []byte("value")}))
+
+	it, err := mc.Get("foo")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(it.Value))
 }
