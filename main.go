@@ -6,18 +6,29 @@ import (
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
+var mc *memcache.Client
+
+func init() {
+	mc = memcache.New("localhost:11211")
+}
+
 func main() {
 	doMain()
 }
 
 func doMain() {
-	mc := memcache.New("localhost:11211")
-	mc.Set((&memcache.Item{Key: "foo", Value: []byte("value")}))
+	set("key1", "val1")
+	fmt.Println(string(get("key1")))
+}
 
-	it, err := mc.Get("foo")
+func set(key, value string) {
+	mc.Set(&memcache.Item{Key: key, Value: []byte(value)})
+}
+
+func get(key string) []byte {
+	item, err := mc.Get(key)
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(string(it.Value))
+	return item.Value
 }
