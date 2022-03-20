@@ -6,14 +6,8 @@ import (
 	"os"
 
 	"github.com/atsushi-kitazawa/golang_memcached_example/model"
-	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/atsushi-kitazawa/golang_memcached_example/repository"
 )
-
-var mc *memcache.Client
-
-func init() {
-	mc = memcache.New("localhost:11211", "localhost:11212")
-}
 
 func main() {
 	doMain()
@@ -31,24 +25,16 @@ func doMain() {
 	switch os.Args[1] {
 	case "set":
 		setCmd.Parse(os.Args[2:])
-		user := model.UserJsonValue(*setKey, *setName, *setBirthday)
-		set(*setKey, user)
+		user := model.NewUser(*setKey, *setName, *setBirthday)
+		repository.Save(*user)
+		repository.Set(*setKey, user.UserJsonValue())
 		fmt.Printf("key %s set value %s\n", *setKey, user)
 	case "get":
 		getCmd.Parse(os.Args[2:])
-		val := string(get(*getKey))
+		val, err := repository.Get(*getKey)
+		if err != nil {
+			val = repository.FindById(*getKey).UserJsonValue()
+		}
 		fmt.Printf("key %s values is %s\n", *getKey, val)
 	}
-}
-
-func set(key, value string) {
-	mc.Set(&memcache.Item{Key: key, Value: []byte(value)})
-}
-
-func get(key string) []byte {
-	item, err := mc.Get(key)
-	if err != nil {
-		panic(err)
-	}
-	return item.Value
 }

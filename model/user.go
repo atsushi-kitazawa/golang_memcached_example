@@ -2,19 +2,21 @@ package model
 
 import "encoding/json"
 
-type user struct {
+type User struct {
 	Id       string `json:"id"`
 	Name     string `json:"name"`
 	Birthday string `json:"birthday"`
 }
 
-func UserJsonValue(id, name, birthday string) string {
-	user := &user{
+func NewUser(id, name, birthday string) *User {
+	return &User{
 		Id:       id,
 		Name:     name,
 		Birthday: birthday,
 	}
-	e, err := json.Marshal(user)
+}
+func (u *User) UserJsonValue() string {
+	e, err := json.Marshal(u)
 	if err != nil {
 		panic(err)
 	}
