@@ -22,3 +22,12 @@ func (u *User) UserJsonValue() string {
 	}
 	return string(e)
 }
+
+func UserFromJson(s string) *User {
+	var u User
+	err := json.Unmarshal([]byte(s), &u)
+	if err != nil {
+		panic(err)
+	}
+	return &u
+}

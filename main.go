@@ -26,15 +26,12 @@ func doMain() {
 	case "set":
 		setCmd.Parse(os.Args[2:])
 		user := model.NewUser(*setKey, *setName, *setBirthday)
-		repository.Save(*user)
-		repository.Set(*setKey, user.UserJsonValue())
+		repo := repository.NewUserRepository()
+		repo.Save(*user)
 		fmt.Printf("key %s set value %s\n", *setKey, user)
 	case "get":
 		getCmd.Parse(os.Args[2:])
-		val, err := repository.Get(*getKey)
-		if err != nil {
-			val = repository.FindById(*getKey).UserJsonValue()
-		}
-		fmt.Printf("key %s values is %s\n", *getKey, val)
+		user := repository.NewUserRepository().FindById(*getKey)
+		fmt.Printf("key %s values is %s\n", *getKey, user)
 	}
 }

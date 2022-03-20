@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
@@ -19,7 +17,6 @@ func Set(key, value string) {
 func Get(key string) (string, error) {
 	item, err := mc.Get(key)
 	if err != nil {
-		fmt.Println(err.Error())
 		return "", err
 	}
 	return string(item.Value), nil
