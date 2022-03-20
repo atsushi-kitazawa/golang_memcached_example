@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/atsushi-kitazawa/golang_memcached_example/database"
 	"github.com/atsushi-kitazawa/golang_memcached_example/model"
 	"github.com/atsushi-kitazawa/golang_memcached_example/repository"
 )
@@ -26,12 +27,12 @@ func doMain() {
 	case "set":
 		setCmd.Parse(os.Args[2:])
 		user := model.NewUser(*setKey, *setName, *setBirthday)
-		repo := repository.NewUserRepository()
+		repo := repository.NewUserRepository(database.NewDbHandler())
 		repo.Save(*user)
 		fmt.Printf("key %s set value %s\n", *setKey, user)
 	case "get":
 		getCmd.Parse(os.Args[2:])
-		user := repository.NewUserRepository().FindById(*getKey)
+		user := repository.NewUserRepository(database.NewDbHandler()).FindById(*getKey)
 		fmt.Printf("key %s values is %s\n", *getKey, user)
 	}
 }
