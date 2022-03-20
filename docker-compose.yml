@@ -1,7 +1,22 @@
 version: '2'
 
 services:
-  memcached:
+  memcached1:
     image: docker.io/bitnami/memcached:1
+    container_name: my_memcached1
     ports:
       - '11211:11211'
+  memcached2:
+    image: docker.io/bitnami/memcached:1
+    container_name: my_memcached2
+    ports:
+      - '11212:11211'
+  postgres:
+    image: postgres:14.2-alpine
+    container_name: my_postgres_14_with_memcached
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+    - 35432:5432
