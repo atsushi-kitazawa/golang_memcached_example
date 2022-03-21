@@ -1,24 +1,25 @@
 package database
 
 import (
-	"database/sql"
-
 	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type IDbHandler interface {
-	GetConnection() *sql.DB
+	GetDatabase() *gorm.DB
 }
 
-type DbHandler struct {
+type dbhandler struct {
 }
 
-func NewDbHandler() *DbHandler {
-	return &DbHandler{}
+func NewDbHandler() IDbHandler {
+	return &dbhandler{}
 }
 
-func (handler DbHandler) GetConnection() *sql.DB {
-	db, err := sql.Open("postgres", "host=localhost port=35432 user=postgres password=password dbname=testdb sslmode=disable")
+func (h *dbhandler) GetDatabase() *gorm.DB {
+	dsn := "host=localhost user=postgres password=password dbname=testdb port=35432 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

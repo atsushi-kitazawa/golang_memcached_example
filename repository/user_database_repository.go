@@ -1,11 +1,11 @@
 package repository
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/atsushi-kitazawa/golang_memcached_example/database"
 	"github.com/atsushi-kitazawa/golang_memcached_example/model"
+	"gorm.io/gorm"
 )
 
 type IUserRepository interface {
@@ -22,25 +22,14 @@ func NewUserRepository(hander database.IDbHandler) *UserRepository {
 }
 
 func (u *UserRepository) Save(user model.User) {
-	db := u.dbhandler.GetConnection()
-	defer db.Close()
-
-	tx, err := db.Begin()
-	if err != nil {
-		fmt.Println("failed to begin transaction. err=" + err.Error())
-		return
-	}
-
-	id := user.Id
-	name := user.Name
-	birthday := user.Birthday
-	err = db.QueryRow("INSERT INTO users (id, name, birthday) VALUES ($1, $2, $3)", id, name, birthday).Scan()
-	if err != nil && err != sql.ErrNoRows {
-		fmt.Println("failed to save user. err=" + err.Error())
-		tx.Rollback()
-		return
-	}
-	tx.Commit()
+	db := u.dbhandler.GetDatabase()
+	db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(user).Error; err != nil {
+			fmt.Println("failed to save user." + err.Error())
+			return err
+		}
+		return nil
+	})
 
 	Set(user.Id, user.UserJsonValue())
 }
@@ -52,13 +41,9 @@ func (u UserRepository) FindById(id string) *model.User {
 		return model.UserFromJson(val)
 	}
 
-	fmt.Println("cache not hit.")
-	db := u.dbhandler.GetConnection()
+	db := u.dbhandler.GetDatabase()
 	var user model.User
-	err = db.QueryRow("SELECT id, name, birthday FROM users WHERE id = $1", id).Scan(&user.Id, &user.Name, &user.Birthday)
-	if err != nil {
-		panic(err)
-	}
+	db.First(&user, id)
 
 	return &user
 }
